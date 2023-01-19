@@ -31,7 +31,7 @@ export async function appRoutes(app: FastifyInstance) {
     })
   })
 
-  app.get('/habits', async () => {
+  app.get('/habits', async (request) => {
     const habits = await prisma.habit.findMany();
 
     return habits;
