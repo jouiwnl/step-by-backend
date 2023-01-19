@@ -7,10 +7,8 @@ const app = Fastify()
 app.register(cors)
 app.register(appRoutes)
 
-const port: string | undefined = process.env.PORT;
+const port = Number(process.env.PORT);
 
-app.listen({
-  port: Number(port) || 3333,
-}).then(() => {
-  console.log('HTTP Server running!')
+app.listen({ port }).then(() => {
+  console.log(`HTTP Server running on port ${port}!`)
 })
