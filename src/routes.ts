@@ -218,7 +218,14 @@ export async function appRoutes(app: FastifyInstance) {
     }
   })
 
-  app.get('/summary', async () => {
+  app.get('/summary/:year', async (request) => {
+
+    const toggleParams = z.object({
+      year: z.coerce.number().min(1900).max(2999)
+    })
+
+    const { year } = toggleParams.parse(request.params);
+
     const summary = await prisma.$queryRaw`
       SELECT 
         D.id, 
@@ -240,13 +247,18 @@ export async function appRoutes(app: FastifyInstance) {
             AND date_trunc('day', H.created_at) <= date_trunc('day', D.date)
         ) as amount
       FROM days D
+      WHERE to_char(D.date, 'YYYY')::int = ${year}
     `
 
     return summary
   })
 
   app.get('/years', async () => {
-    const years = await prisma.year.findMany();
+    const years = await prisma.year.findMany({
+      orderBy: {
+        year_number: 'asc'
+      }
+    });
 
     return years;
   })
