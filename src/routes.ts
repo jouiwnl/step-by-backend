@@ -38,6 +38,25 @@ export async function appRoutes(app: FastifyInstance) {
     return habits;
   })
 
+  app.get('/habits/:id', async (request) => {
+    const toggleParams = z.object({
+      id: z.string()
+    })
+
+    const { id } = toggleParams.parse(request.params);
+
+    const habit = await prisma.habit.findUnique({
+      where: {
+        id: id
+      },
+      include: {
+        weekDays: true
+      }
+    });
+
+    return habit;
+  })
+
   app.put('/habits/:id', async (request) => {
     const updateParams = z.object({
       id: z.string().uuid()
