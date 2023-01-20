@@ -44,8 +44,7 @@ export async function appRoutes(app: FastifyInstance) {
     const habits = await prisma.habit.findMany({
       where: {
         created_at: {
-          lte: endYear.toDate(),
-          gte: startYear.toDate()
+          lte: endYear.toDate()
         }
       }
     });
