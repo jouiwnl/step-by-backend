@@ -10,16 +10,17 @@ export async function appRoutes(app: FastifyInstance) {
       weekDays: z.array(
         z.number().min(0).max(6)
       ),
+      created_at: z.string()
     })
 
-    const { title, weekDays } = createHabitBody.parse(request.body)
+    const { title, weekDays, created_at } = createHabitBody.parse(request.body)
 
     const today = dayjs().startOf('day').toDate()
 
     await prisma.habit.create({
       data: {
         title,
-        created_at: today,
+        created_at,
         weekDays: {
           create: weekDays.map((weekDay) => {
             return {
