@@ -38,7 +38,6 @@ export async function appRoutes(app: FastifyInstance) {
     })
 
     const { year } = toggleParams.parse(request.params);
-    const startYear = dayjs().year(year).startOf('year');
     const endYear = dayjs().year(year).endOf('year');
 
     const habits = await prisma.habit.findMany({
@@ -277,12 +276,25 @@ export async function appRoutes(app: FastifyInstance) {
     return years;
   })
 
-  app.post('/years', async (request) => {
+  app.post('/years', async (request, reply) => {
     const toggleBody = z.object({
       year_number: z.number().min(1900).max(2999)
     })
 
     const { year_number } = toggleBody.parse(request.body);
+
+    const exists = await prisma.year.findFirst({
+      where: {
+        year_number
+      }
+    })
+
+    if (exists) {
+      reply.status(422).send({
+        statusCode: 422,
+        message: `O ano ${year_number} já existe!`
+      })
+    }
 
     const year = await prisma.year.create({
       data: {
