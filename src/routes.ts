@@ -109,6 +109,12 @@ export async function appRoutes(app: FastifyInstance) {
         habit_id: id
       }
     })
+
+    await prisma.dayHabit.deleteMany({
+      where: {
+        habit_id: id
+      }
+    })
     
     await prisma.habit.delete({
       where: {
