@@ -294,6 +294,8 @@ export async function appRoutes(app: FastifyInstance) {
         statusCode: 422,
         message: `O ano ${year_number} já existe!`
       })
+
+      return;
     }
 
     const year = await prisma.year.create({
