@@ -32,8 +32,23 @@ export async function appRoutes(app: FastifyInstance) {
     })
   })
 
-  app.get('/habits', async (request) => {
-    const habits = await prisma.habit.findMany();
+  app.get('/habits/by-year/:year', async (request) => {
+    const toggleParams = z.object({
+      year: z.coerce.number().min(1900).max(2999)
+    })
+
+    const { year } = toggleParams.parse(request.params);
+    const startYear = dayjs().year(year).startOf('year');
+    const endYear = dayjs().year(year).endOf('year');
+
+    const habits = await prisma.habit.findMany({
+      where: {
+        created_at: {
+          lte: endYear.toDate(),
+          gte: startYear.toDate()
+        }
+      }
+    });
 
     return habits;
   })
