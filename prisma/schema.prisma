@@ -55,3 +55,10 @@ model DayHabit {
   @@unique([day_id, habit_id])
   @@map("day_habits")
 }
+
+model Year {
+  id          String @id @default(uuid())
+  year_number Int
+
+  @@map("years")
+}

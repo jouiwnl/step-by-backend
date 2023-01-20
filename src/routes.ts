@@ -244,5 +244,27 @@ export async function appRoutes(app: FastifyInstance) {
 
     return summary
   })
+
+  app.get('/years', async () => {
+    const years = await prisma.year.findMany();
+
+    return years;
+  })
+
+  app.post('/years', async (request) => {
+    const toggleBody = z.object({
+      year_number: z.number().min(1900).max(2999)
+    })
+
+    const { year_number } = toggleBody.parse(request.body);
+
+    const year = await prisma.year.create({
+      data: {
+        year_number
+      }
+    })
+
+    return year;
+  })
 }
 
