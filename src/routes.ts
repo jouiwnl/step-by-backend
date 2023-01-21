@@ -157,7 +157,7 @@ export async function appRoutes(app: FastifyInstance) {
 
     const { date } = getDayParams.parse(request.query)
 
-    const parsedDate = dayjs(date).startOf('day');
+    const parsedDate = dayjs(date).startOf('day').add(3, 'hour');
     const weekDay = parsedDate.get('day')
 
     console.log(parsedDate.toDate())
