@@ -46,7 +46,7 @@ export async function appRoutes(app: FastifyInstance) {
       select 
         habit.id,
         habit.title,
-        habit.created_at
+        habit.created_at,
         (
           select 
             string_agg(W.week_day::text, ',')
