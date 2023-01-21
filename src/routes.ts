@@ -1,4 +1,4 @@
-import dayjs from "dayjs"
+import { dayjs } from "./lib/dayjs"
 import { FastifyInstance } from "fastify"
 import { z } from "zod"
 import { prisma } from "./lib/prisma"
@@ -157,9 +157,7 @@ export async function appRoutes(app: FastifyInstance) {
 
     const { date } = getDayParams.parse(request.query)
 
-    const newDate = dayjs(date).add(3, 'hour');
-
-    const parsedDate = dayjs(newDate).startOf('day');
+    const parsedDate = dayjs(date).startOf('day');
     const weekDay = parsedDate.get('day')
 
     console.log(parsedDate.toDate())
