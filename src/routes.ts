@@ -46,6 +46,7 @@ export async function appRoutes(app: FastifyInstance) {
       select 
         habit.id,
         habit.title,
+        habit.created_at
         (
           select 
             string_agg(W.week_day::text, ',')
@@ -54,7 +55,7 @@ export async function appRoutes(app: FastifyInstance) {
         ) as weekDays
       from habits habit
       where date_trunc('day', habit.created_at) <= date_trunc('day', ${endYear.toDate()})
-      order by created_at asc
+      order by habit.created_at asc
     `;
 
     return habits;
