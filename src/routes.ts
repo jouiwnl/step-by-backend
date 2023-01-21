@@ -42,13 +42,20 @@ export async function appRoutes(app: FastifyInstance) {
     const { year } = toggleParams.parse(request.params);
     const endYear = dayjs().year(year).endOf('year');
 
-    const habits = await prisma.habit.findMany({
-      where: {
-        created_at: {
-          lte: endYear.toDate()
-        }
-      }
-    });
+    const habits = await prisma.$queryRaw`
+      select 
+        habit.id,
+        habit.title,
+        (
+          select 
+            string_agg(W.week_day::text, ',')
+          from habit_week_days W
+          where habit_id = habit.id
+        ) as weekDays
+      from habits habit
+      where date_trunc('day', habit.created_at) <= date_trunc('day', ${endYear.toDate()})
+      order by created_at asc
+    `;
 
     return habits;
   })
