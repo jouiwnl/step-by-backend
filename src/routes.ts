@@ -12,12 +12,11 @@ export async function appRoutes(app: FastifyInstance) {
       weekDays: z.array(
         z.number().min(0).max(6)
       ),
-      created_at: z.string()
+      user_id: z.string().uuid(),
+      created_at: z.coerce.date()
     })
 
-    const { title, weekDays, created_at } = createHabitBody.parse(request.body)
-
-    const today = dayjs().startOf('day').toDate()
+    const { title, weekDays, created_at, user_id } = createHabitBody.parse(request.body)
 
     await prisma.habit.create({
       data: {
@@ -29,17 +28,19 @@ export async function appRoutes(app: FastifyInstance) {
               week_day: weekDay,
             }
           }),
-        }
+        },
+        user_id: user_id
       }
     })
   })
 
-  app.get('/habits/by-year/:year', async (request) => {
+  app.get('/habits', async (request) => {
     const toggleParams = z.object({
-      year: z.coerce.number().min(1900).max(2999)
+      year: z.coerce.number().min(1900).max(2999),
+      user_id: z.string().uuid()
     })
 
-    const { year } = toggleParams.parse(request.params);
+    const { year, user_id } = toggleParams.parse(request.query);
     const endYear = dayjs().year(year).endOf('year');
 
     const habits = await prisma.$queryRaw`
@@ -55,6 +56,7 @@ export async function appRoutes(app: FastifyInstance) {
         ) as weekDays
       from habits habit
       where date_trunc('day', habit.created_at) <= date_trunc('day', ${endYear.toDate()})
+      and user_id = ${user_id}
       order by habit.created_at asc
     `;
 
@@ -161,9 +163,10 @@ export async function appRoutes(app: FastifyInstance) {
   app.get('/day', async (request) => {
     const getDayParams = z.object({
       date: z.coerce.date(),
+      user_id: z.string().uuid()
     })
 
-    const { date } = getDayParams.parse(request.query)
+    const { date, user_id } = getDayParams.parse(request.query)
 
     const parsedDate = dayjs(date).startOf('day');
     const parsedDateBrazil = parsedDate.add(3, 'hour');
@@ -178,13 +181,14 @@ export async function appRoutes(app: FastifyInstance) {
           some: {
             week_day: weekDay,
           }
-        }
+        },
+        user_id
       },
     })
 
     const day = await prisma.day.findFirst({
       where: {
-        date: parsedDate.toDate(),
+        date: parsedDate.toDate()
       },
       include: {
         dayHabits: true,
@@ -207,11 +211,12 @@ export async function appRoutes(app: FastifyInstance) {
     })
 
     const toggleHabitBody = z.object({
-      date: z.string()
+      date: z.string(),
+      user_id: z.string().uuid()
     })
 
     const { id } = toggleHabitParams.parse(request.params)
-    const { date } = toggleHabitBody.parse(request.body)
+    const { date, user_id } = toggleHabitBody.parse(request.body)
 
     const today = dayjs(date).startOf('day').toDate()
 
@@ -224,7 +229,8 @@ export async function appRoutes(app: FastifyInstance) {
     if(!day) {
       day = await prisma.day.create({
         data: {
-          date: today
+          date: today,
+          user_id
         }
       })
     }
@@ -254,13 +260,14 @@ export async function appRoutes(app: FastifyInstance) {
     }
   })
 
-  app.get('/summary/:year', async (request) => {
+  app.get('/summary', async (request) => {
 
     const toggleParams = z.object({
-      year: z.coerce.number().min(1900).max(2999)
+      year: z.coerce.number().min(1900).max(2999),
+      user_id: z.string().uuid()
     })
 
-    const { year } = toggleParams.parse(request.params);
+    const { year, user_id } = toggleParams.parse(request.query);
 
     const summary = await prisma.$queryRaw`
       SELECT 
@@ -284,13 +291,23 @@ export async function appRoutes(app: FastifyInstance) {
         ) as amount
       FROM days D
       WHERE to_char(D.date, 'YYYY')::int = ${year}
+      and user_id = ${user_id}
     `
 
     return summary
   })
 
-  app.get('/years', async () => {
+  app.get('/years', async (request) => {
+    const toggleParams = z.object({
+      user_id: z.string().uuid()
+    })
+
+    const { user_id } = toggleParams.parse(request.query);
+    
     const years = await prisma.year.findMany({
+      where: {
+        user_id: user_id
+      },
       orderBy: {
         year_number: 'asc'
       }
@@ -301,10 +318,11 @@ export async function appRoutes(app: FastifyInstance) {
 
   app.post('/years', async (request, reply) => {
     const toggleBody = z.object({
-      year_number: z.number().min(1900).max(2999)
+      year_number: z.number().min(1900).max(2999),
+      user_id: z.string().uuid()
     })
 
-    const { year_number } = toggleBody.parse(request.body);
+    const { year_number, user_id } = toggleBody.parse(request.body);
 
     const exists = await prisma.year.findFirst({
       where: {
@@ -323,59 +341,45 @@ export async function appRoutes(app: FastifyInstance) {
 
     const year = await prisma.year.create({
       data: {
-        year_number
+        year_number,
+        user_id
       }
     })
 
     return year;
   })
 
-  app.get('/get-range-date/:year', async (request) => {
+  app.post('/users', async (request) => {
+    const toggleUserBody = z.object({
+      email: z.string().email()
+    })
+
+    const { email } = toggleUserBody.parse(request.body);
+
+    const user = await prisma.user.create({
+      data: {
+        email
+      }
+    })
+
+    return user;
+  })
+
+  app.get('/users/:id', async (request) => {
     const toggleParams = z.object({
-      year: z.coerce.number().min(1900).max(2999)
+      id: z.string().uuid()
     })
 
-    const { year } = toggleParams.parse(request.params);
+    const { id } = toggleParams.parse(request.body);
 
-    const startDate = dayjs().year(year).startOf('year')
-    const currentYear = dayjs().startOf('year').get('year');
-    const isSameYear = currentYear === year;
-    const endDate = isSameYear ? new Date() : dayjs().year(year).endOf('year').toDate();
-  
-    let dateRange = []
-    let compareDate = startDate
-  
-    const weekDaysByStartDate = Array.from({ length: startDate.get('day') })
-      .map((_, index) => {
-        return {
-          index: index,
-          day_of_week: index + 1
-        }
-      });
-  
-    weekDaysByStartDate.reverse().forEach(day => {
-      const newDate = startDate.subtract(day.day_of_week, 'day');
-  
-      dateRange.push({
-        id: newDate.toISOString(),
-        date: newDate.toDate(),
-        day_of_week: startDate.get('day'),
-        disabled: true
-      })
+    const user = await prisma.user.findUnique({
+      where: {
+        id
+      }
     })
-  
-    while (compareDate.isBefore(endDate)) {
-      dateRange.push({
-        id: compareDate.toISOString(),
-        date: compareDate.toDate(),
-        day_of_week: compareDate.get('day'),
-        disabled: false
-      })
-  
-      compareDate = compareDate.add(1, 'day')
-    }
-  
-    return dateRange
+
+    return user;
   })
 }
 
+//23b055f2-8ceb-431e-8581-833cb9e69ac1

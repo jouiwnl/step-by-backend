@@ -15,6 +15,9 @@ model Habit {
   id         String   @id @default(uuid())
   title      String
   created_at DateTime
+  user_id String
+
+  user User @relation(fields: [user_id], references: [id])
 
   dayHabits DayHabit[]
   weekDays  HabitWeekDays[]
@@ -36,6 +39,9 @@ model HabitWeekDays {
 model Day {
   id   String   @id @default(uuid())
   date DateTime
+  user_id String
+
+  user User @relation(fields: [user_id], references: [id])
 
   dayHabits DayHabit[]
 
@@ -59,6 +65,20 @@ model DayHabit {
 model Year {
   id          String @id @default(uuid())
   year_number Int
+  user_id String
+
+  user User @relation(fields: [user_id], references: [id])
 
   @@map("years")
+}
+
+model User {
+  id String @id @default(uuid())
+  email String
+
+  years Year[]
+  habits Habit[]
+  days Day[]
+  
+  @@map("users")
 }
