@@ -326,7 +326,8 @@ export async function appRoutes(app: FastifyInstance) {
 
     const exists = await prisma.year.findFirst({
       where: {
-        year_number
+        year_number,
+        user_id: user_id
       }
     })
 
