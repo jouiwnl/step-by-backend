@@ -365,16 +365,16 @@ export async function appRoutes(app: FastifyInstance) {
     return user;
   })
 
-  app.get('/users/:id', async (request) => {
+  app.get('/users/:email', async (request) => {
     const toggleParams = z.object({
-      id: z.string().uuid()
+      email: z.string().email()
     })
 
-    const { id } = toggleParams.parse(request.body);
+    const { email } = toggleParams.parse(request.body);
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
-        id
+        email
       }
     })
 
