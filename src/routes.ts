@@ -370,7 +370,7 @@ export async function appRoutes(app: FastifyInstance) {
       email: z.string().email()
     })
 
-    const { email } = toggleParams.parse(request.body);
+    const { email } = toggleParams.parse(request.params);
 
     const user = await prisma.user.findFirst({
       where: {
