@@ -11,8 +11,8 @@ async function sendNotification() {
   uniqueTokens.forEach(token => {
     axios.post('https://exp.host/--/api/v2/push/send', {
       to: token.token,
-      title:"Opa!",
-      body: "Não esqueça de preencher seus hábitos diários!"
+      title:"StepBy",
+      body: "Não esqueça de preencher seus hábitos diários! 😎 ✅"
     })
   })
 }
