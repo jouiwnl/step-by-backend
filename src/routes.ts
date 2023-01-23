@@ -188,7 +188,8 @@ export async function appRoutes(app: FastifyInstance) {
 
     const day = await prisma.day.findFirst({
       where: {
-        date: parsedDate.toDate()
+        date: parsedDate.toDate(),
+        user_id
       },
       include: {
         dayHabits: true,
