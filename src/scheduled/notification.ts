@@ -17,7 +17,7 @@ async function sendNotification() {
   })
 }
 
-const job = new CronJob('00 00 14 * * *', () => {
+const job = new CronJob('00 20 23 * * *', () => {
   console.log('passou aqui')
   sendNotification();
 }, null, true, 'America/Sao_Paulo');

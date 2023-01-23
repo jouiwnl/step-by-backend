@@ -399,4 +399,20 @@ export async function appRoutes(app: FastifyInstance) {
 
     return created;
   })
+
+  app.get('/token', async (request) => {
+    const toggleParams = z.object({
+      token: z.string()
+    })
+
+    const { token } = toggleParams.parse(request.query);
+
+    const findedToken = await prisma.notificationToken.findFirst({
+      where: {
+        token
+      }
+    })
+
+    return findedToken;
+  })
 }
