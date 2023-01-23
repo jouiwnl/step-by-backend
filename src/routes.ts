@@ -381,6 +381,22 @@ export async function appRoutes(app: FastifyInstance) {
 
     return user;
   })
-}
 
-//23b055f2-8ceb-431e-8581-833cb9e69ac1
+  app.post('/token', async (request) => {
+    const toggleBody = z.object({
+      token: z.string(),
+      user_id: z.string().uuid()
+    })
+
+    const { token, user_id } = toggleBody.parse(request.body);
+
+    const created = await prisma.notificationToken.create({
+      data: {
+        token,
+        user_id
+      }
+    })
+
+    return created;
+  })
+}

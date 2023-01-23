@@ -1,6 +1,7 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { appRoutes } from "./routes"
+import { job } from './scheduled/notification'
 
 const app = Fastify()
 
@@ -14,4 +15,5 @@ app.listen({
   host: '0.0.0.0'
 }).then(() => {
   console.log(`HTTP Server running on port ${port}!`)
+  job.start()
 })

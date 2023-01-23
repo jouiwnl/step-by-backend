@@ -82,3 +82,9 @@ model User {
   
   @@map("users")
 }
+
+model NotificationToken {
+  id String @id @default(uuid())
+  token String
+  user_id String
+}
