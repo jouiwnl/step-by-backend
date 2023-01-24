@@ -17,8 +17,12 @@ async function sendNotification() {
   })
 }
 
-const job = new CronJob('00 00 14 * * *', () => {
+const job14 = new CronJob('00 00 14 * * *', () => {
   sendNotification();
 }, null, true, 'America/Sao_Paulo');
 
-export { job }
+const job20 = new CronJob('00 00 20 * * *', () => {
+  sendNotification();
+}, null, true, 'America/Sao_Paulo');
+
+export { job14, job20 }
