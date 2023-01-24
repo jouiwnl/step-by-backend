@@ -219,7 +219,7 @@ export async function appRoutes(app: FastifyInstance) {
     const { id } = toggleHabitParams.parse(request.params)
     const { date, user_id } = toggleHabitBody.parse(request.body)
 
-    const today = dayjs(date).startOf('day').toDate()
+    const today = dayjs(date).startOf('day').add(3, 'hour').toDate()
 
     let day = await prisma.day.findFirst({
       where: {
@@ -290,6 +290,7 @@ export async function appRoutes(app: FastifyInstance) {
           WHERE
             HDW.week_day = (to_char(D.date, 'D')::int) - 1
             AND date_trunc('day', H.created_at) <= date_trunc('day', D.date)
+            AND H.user_id = ${user_id}
         ) as amount
       FROM days D
       WHERE to_char(D.date, 'YYYY')::int = ${year}
