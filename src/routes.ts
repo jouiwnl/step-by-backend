@@ -185,10 +185,12 @@ export async function appRoutes(app: FastifyInstance) {
       },
     })
 
-    const day = await prisma.day.findFirst({
+    const day = await prisma.day.findUnique({
       where: {
-        date: parsedDate.toDate(),
-        user_id
+        date_user_id: {
+          date: parsedDate.toDate(),
+          user_id
+        } 
       },
       include: {
         dayHabits: true,
@@ -220,10 +222,12 @@ export async function appRoutes(app: FastifyInstance) {
 
     const today = dayjs.utc(date).tz('America/Sao_Paulo').startOf('day');
 
-    let day = await prisma.day.findFirst({
+    let day = await prisma.day.findUnique({
       where: {
-        date: today.toDate(),
-        user_id
+        date_user_id: {
+          date: today.toDate(),
+          user_id
+        }
       }
     })
 
