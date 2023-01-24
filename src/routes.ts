@@ -176,7 +176,7 @@ export async function appRoutes(app: FastifyInstance) {
 
     const { date, user_id } = getDayParams.parse(request.query)
 
-    const parsedDate = dayjs(date).startOf('days');
+    const parsedDate = dayjs(date).startOf('day').tz('America/Sao_Paulo', true);
     const weekDay = dayjs(date).get('day')
 
     console.log(parsedDate.toDate())
@@ -195,17 +195,17 @@ export async function appRoutes(app: FastifyInstance) {
       },
     })
 
-    const day = await prisma.day.findUnique({
+    const day = await prisma.day.findFirst({
       where: {
-        date_user_id: {
-          date: parsedDate.toDate(),
-          user_id
-        } 
+        date: parsedDate.toDate(),
+        user_id
       },
       include: {
         dayHabits: true,
       }
     })
+
+    console.log(day)
 
     const completedHabits = day?.dayHabits.map(dayHabit => {
       return dayHabit.habit_id
@@ -230,7 +230,7 @@ export async function appRoutes(app: FastifyInstance) {
     const { id } = toggleHabitParams.parse(request.params)
     const { date, user_id } = toggleHabitBody.parse(request.body)
 
-    const today = dayjs(date).tz('America/Sao_Paulo').startOf('day');
+    const today = dayjs(date).startOf('day').tz('America/Sao_Paulo', true);
 
     let day = await prisma.day.findUnique({
       where: {
