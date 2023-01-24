@@ -219,7 +219,7 @@ export async function appRoutes(app: FastifyInstance) {
     const { id } = toggleHabitParams.parse(request.params)
     const { date, user_id } = toggleHabitBody.parse(request.body)
 
-    const today = dayjs(date).startOf('day').add(3, 'hour').toDate()
+    const today = dayjs.utc(date).tz('America/Sao_Paulo').startOf('day').toDate()
 
     let day = await prisma.day.findFirst({
       where: {
