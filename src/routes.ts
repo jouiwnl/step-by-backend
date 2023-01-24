@@ -1,9 +1,17 @@
-import { dayjs } from "./lib/dayjs"
+import dayjs from "dayjs"
 import { FastifyInstance } from "fastify"
 import { z } from "zod"
 import { prisma } from "./lib/prisma"
+import 'dayjs/locale/pt-br';
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 
 const weekDaysNumbers = [0, 1, 2, 3, 4, 5, 6] // Sun: 0, Sat: 6
+
+dayjs.locale('pt-br');
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("America/Sao_Paulo");
 
 export async function appRoutes(app: FastifyInstance) {
   app.post('/habits', async (request) => {
@@ -170,8 +178,6 @@ export async function appRoutes(app: FastifyInstance) {
 
     const parsedDate = dayjs(date).tz('America/Sao_Paulo', true).startOf('day');
     const weekDay = dayjs(date).get('day')
-
-    console.log(parsedDate);
 
     const possibleHabits = await prisma.habit.findMany({
       where: {

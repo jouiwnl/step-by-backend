@@ -6,8 +6,4 @@ import timezone from 'dayjs/plugin/timezone'
 dayjs.locale('pt-br');
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.tz.setDefault("America/New_York");
-
-export {
-  dayjs
-}
+dayjs.tz.setDefault("America/Sao_Paulo");
