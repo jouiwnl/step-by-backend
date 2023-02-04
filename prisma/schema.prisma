@@ -79,6 +79,7 @@ model User {
   years Year[]
   habits Habit[]
   days Day[]
+  colors Color[]
   
   @@map("users")
 }
@@ -87,4 +88,19 @@ model NotificationToken {
   id String @id @default(uuid())
   token String
   user_id String
+}
+
+model Color {
+  id String @id @default(uuid())
+  color_1 String
+  color_2 String
+  color_3 String
+  color_4 String
+  color_5 String 
+
+  user_id String
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("colors")
 }
