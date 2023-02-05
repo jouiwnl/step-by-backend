@@ -79,7 +79,7 @@ model User {
   years Year[]
   habits Habit[]
   days Day[]
-  colors Color[]
+  color Color?
   
   @@map("users")
 }
@@ -98,7 +98,7 @@ model Color {
   color_4 String
   color_5 String 
 
-  user_id String
+  user_id String @unique
 
   user User @relation(fields: [user_id], references: [id])
 

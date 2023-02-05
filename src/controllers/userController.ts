@@ -29,6 +29,9 @@ export async function userController(app: FastifyInstance) {
     const user = await prisma.user.findFirst({
       where: {
         email
+      },
+      include: {
+        color: true
       }
     })
 
