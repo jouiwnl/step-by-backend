@@ -5,6 +5,7 @@ import { z } from "zod"
 import 'dayjs/locale/pt-br';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { redis } from "../lib/cache";
 
 dayjs.locale('pt-br');
 dayjs.extend(utc);
@@ -14,7 +15,7 @@ dayjs.tz.setDefault("America/Sao_Paulo");
 const weekDaysNumbers = [0, 1, 2, 3, 4, 5, 6] // Sun: 0, Sat: 6
 
 export async function habitController(app: FastifyInstance) {
-	app.post('/habits', async (request) => {
+  app.post('/habits', async (request) => {
     const createHabitBody = z.object({
       title: z.string(),
       weekDays: z.array(
@@ -25,6 +26,8 @@ export async function habitController(app: FastifyInstance) {
     })
 
     const { title, weekDays, created_at, user_id } = createHabitBody.parse(request.body)
+
+    redis.del(`stepby::summary::${user_id}::${created_at.getFullYear()}`);
 
     await prisma.habit.create({
       data: {
@@ -139,6 +142,8 @@ export async function habitController(app: FastifyInstance) {
       }
     })
 
+    redis.del(`stepby::summary::${habit.user_id}::${habit.created_at.getFullYear()}`);
+
     return habit;
   })
 
@@ -160,7 +165,15 @@ export async function habitController(app: FastifyInstance) {
         habit_id: id
       }
     })
-    
+
+    const habit = await prisma.habit.findUnique({
+      where: {
+        id
+      }
+    })
+
+    redis.del(`stepby::summary::${habit?.user_id}::${habit?.created_at.getFullYear()}`);
+
     await prisma.habit.delete({
       where: {
         id
@@ -168,7 +181,7 @@ export async function habitController(app: FastifyInstance) {
     })
   })
 
-	app.patch('/habits/:id/toggle', async (request) => {
+  app.patch('/habits/:id/toggle', async (request) => {
     const toggleHabitParams = z.object({
       id: z.string().uuid()
     })
@@ -183,6 +196,8 @@ export async function habitController(app: FastifyInstance) {
 
     const today = dayjs(date);
 
+    redis.del(`stepby::summary::${user_id}::${today.year}`);
+
     let day = await prisma.day.findUnique({
       where: {
         date_user_id: {
@@ -192,7 +207,7 @@ export async function habitController(app: FastifyInstance) {
       }
     })
 
-    if(!day) {
+    if (!day) {
       day = await prisma.day.create({
         data: {
           date: today.toDate(),
@@ -210,7 +225,7 @@ export async function habitController(app: FastifyInstance) {
       }
     })
 
-    if(dayHabit) {
+    if (dayHabit) {
       await prisma.dayHabit.delete({
         where: {
           id: dayHabit.id
