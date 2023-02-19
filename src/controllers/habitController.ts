@@ -5,7 +5,6 @@ import { z } from "zod"
 import 'dayjs/locale/pt-br';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import { redis } from "../lib/cache";
 
 dayjs.locale('pt-br');
 dayjs.extend(utc);
@@ -27,7 +26,7 @@ export async function habitController(app: FastifyInstance) {
 
     const { title, weekDays, created_at, user_id } = createHabitBody.parse(request.body)
 
-    redis.del(`stepby::summary::${user_id}::${created_at.getFullYear()}`);
+    //redis.del(`stepby::summary::${user_id}::${created_at.getFullYear()}`);
 
     await prisma.habit.create({
       data: {
@@ -142,7 +141,7 @@ export async function habitController(app: FastifyInstance) {
       }
     })
 
-    redis.del(`stepby::summary::${habit.user_id}::${habit.created_at.getFullYear()}`);
+    //redis.del(`stepby::summary::${habit.user_id}::${habit.created_at.getFullYear()}`);
 
     return habit;
   })
@@ -172,7 +171,7 @@ export async function habitController(app: FastifyInstance) {
       }
     })
 
-    redis.del(`stepby::summary::${habit?.user_id}::${habit?.created_at.getFullYear()}`);
+    //redis.del(`stepby::summary::${habit?.user_id}::${habit?.created_at.getFullYear()}`);
 
     await prisma.habit.delete({
       where: {
@@ -196,7 +195,7 @@ export async function habitController(app: FastifyInstance) {
 
     const today = dayjs(date);
 
-    redis.del(`stepby::summary::${user_id}::${today.year()}`);
+    //redis.del(`stepby::summary::${user_id}::${today.year()}`);
 
     let day = await prisma.day.findUnique({
       where: {

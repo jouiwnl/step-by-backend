@@ -2,15 +2,15 @@ import { redis } from "../lib/cache";
 import { prisma } from "../lib/prisma";
 
 export async function getSummary(year: number, user_id: string) {
-  const summaryKey = `stepby::summary::${user_id}::${year}`;
+  //const summaryKey = `stepby::summary::${user_id}::${year}`;
 
-  let summary = await redis.get(summaryKey);
+  //let summary = await redis.get(summaryKey);
 
-  if (summary) {
-    return JSON.parse(summary);
-  }
+  //if (summary) {
+  //  return JSON.parse(summary);
+  //}
 
-  summary = await prisma.$queryRaw`
+  return await prisma.$queryRaw`
     SELECT 
       D.id, 
       D.date,
@@ -36,7 +36,7 @@ export async function getSummary(year: number, user_id: string) {
     and user_id = ${user_id}
   `
 
-  redis.set(summaryKey, JSON.stringify(summary));
+  //redis.set(summaryKey, JSON.stringify(summary));
 
-  return summary
+  //return summary
 }
