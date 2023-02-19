@@ -20,13 +20,13 @@ export async function dayController(app: FastifyInstance) {
 
 		const { date, user_id } = getDayParams.parse(request.query)
 
-		const parsedDate = dayjs(date);
+    console.log(date)
 		const weekDay = dayjs(date).get('day')
 
 		const possibleHabits = await prisma.habit.findMany({
 			where: {
 				created_at: {
-					lte: parsedDate.toDate(),
+					lte: date,
 				},
 				weekDays: {
 					some: {
@@ -39,7 +39,7 @@ export async function dayController(app: FastifyInstance) {
 
 		const day = await prisma.day.findFirst({
 			where: {
-				date: parsedDate.toDate(),
+				date: date,
 				user_id
 			},
 			include: {
