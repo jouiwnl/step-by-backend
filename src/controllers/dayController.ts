@@ -20,7 +20,7 @@ export async function dayController(app: FastifyInstance) {
 
 		const { date, user_id } = getDayParams.parse(request.query)
 
-    console.log(date)
+    console.log(new Date().toISOString())
 		const weekDay = dayjs(date).get('day')
 
 		const possibleHabits = await prisma.habit.findMany({
