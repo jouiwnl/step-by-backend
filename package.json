@@ -4,8 +4,8 @@
   "description": "",
   "main": "soma.js",
   "scripts": {
-    "dev": "tsx src/server.ts",
-    "start": "node dist/server.js",
+    "dev": "tsx src/app.ts",
+    "start": "node dist/app.js",
     "build": "tsc",
     "test": "vitest",
     "coverage": "vitest run --coverage"
