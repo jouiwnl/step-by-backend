@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod"
-import { getSummary } from "../services/summaryService";
+import SummaryService from "../services/summaryService";
 
 export async function summaryController(app: FastifyInstance) {
 	app.get('/summary', async (request) => {
@@ -12,6 +12,6 @@ export async function summaryController(app: FastifyInstance) {
 
     const { year, user_id } = toggleParams.parse(request.query);
 
-    return getSummary(year, user_id);
+    return SummaryService.getSummary(year, user_id);
   })
 }

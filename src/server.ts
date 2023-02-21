@@ -1,20 +1,9 @@
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import { appRoutes } from "./routes"
-import { job14, job20 } from './scheduled/notification'
 
-const app = Fastify()
+const server = Fastify()
+  .register(cors)
+  .register(appRoutes)
 
-app.register(cors)
-app.register(appRoutes)
-
-const port = Number(process.env.PORT)  || 3333;
-
-app.listen({
-  port,
-  host: '0.0.0.0'
-}).then(() => {
-  console.log(`HTTP Server running on port ${port}!`);
-  job14.start();
-  job20.start();
-})
+export { server };

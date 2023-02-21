@@ -1,9 +1,13 @@
 import Redis from 'ioredis';
 
-const redisHost = process.env.REDIS_HOST;
+export default class RedisService {
+  static redis() {
+    const redisHost = process.env.REDIS_HOST;
 
-if (!redisHost) {
-  throw new Error("Failed to connect to Redis.")
+    if (!redisHost) {
+      throw new Error("Failed to connect to Redis.")
+    }
+
+    return new Redis(redisHost);
+  }
 }
-
-export const redis = new Redis(redisHost);
