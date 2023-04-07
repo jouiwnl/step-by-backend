@@ -27,7 +27,7 @@ export default class SummaryService {
           AND (
             H.deactivation_date is null
             OR (H.deactivation_date is not null and date_trunc('day', H.deactivation_date) > date_trunc('day', D.date))
-            OR (H.activation_date is not null and date_trunc('day', H.deactivation_date) <= date_trunc('day', H.activation_date) 
+            OR (H.activation_date is not null and date_trunc('day', H.deactivation_date) < date_trunc('day', H.activation_date) 
                 and date_trunc('day', H.activation_date) <= date_trunc('day', D.date)
               )
           )
@@ -45,7 +45,7 @@ export default class SummaryService {
             AND (
               H.deactivation_date is null
               OR (H.deactivation_date is not null and date_trunc('day', H.deactivation_date) > date_trunc('day', D.date))
-              OR (H.activation_date is not null and date_trunc('day', H.deactivation_date) <= date_trunc('day', H.activation_date) 
+              OR (H.activation_date is not null and date_trunc('day', H.deactivation_date) < date_trunc('day', H.activation_date) 
                   and date_trunc('day', H.activation_date) <= date_trunc('day', D.date)
                 )
             )

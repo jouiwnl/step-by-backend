@@ -70,7 +70,7 @@ function getValidHabit(user_id: string) {
     id: randomUUID(),
     title: "Any habit",
     activation_date: dayjs("2023-04-07").toISOString(),
-    deactivation_date: dayjs("2023-04-07").toISOString(),
+    deactivation_date: dayjs("2023-04-06").toISOString(),
     created_at: dayjs().subtract(2, 'day').toISOString(),
     user_id
   }
