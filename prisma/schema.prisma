@@ -16,6 +16,8 @@ model Habit {
   title      String
   created_at DateTime
   user_id String
+  deactivation_date DateTime?
+  activation_date DateTime?
 
   user User @relation(fields: [user_id], references: [id])
 

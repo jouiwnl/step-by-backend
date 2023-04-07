@@ -84,18 +84,29 @@ describe('habit controller test', () => {
     expect(json).toStrictEqual(habit);
   })
 
-  test('should delete a habit', async () => {
+  test('should deactivate a habit', async () => {
     const habit = responseHabit();
 
     prisma.habit.findUnique = vitest.fn().mockReturnValueOnce(habit);
-    prisma.habit.delete = vitest.fn().mockReturnValueOnce(null);
-    prisma.habitWeekDays.deleteMany = vitest.fn().mockReturnValueOnce(null);
-    prisma.dayHabit.deleteMany = vitest.fn().mockReturnValueOnce(null);
     redis.del = vitest.fn().mockImplementation(() => {});
 
     const res = await app.inject({
-      method: 'DELETE',
-      url: `/habits/${habit.id}`
+      method: 'PATCH',
+      url: `/habits/${habit.id}/DEACTIVE`
+    });
+
+    expect(res.statusCode).toStrictEqual(200);
+  })
+
+  test('should activate a habit', async () => {
+    const habit = responseHabit();
+
+    prisma.habit.findUnique = vitest.fn().mockReturnValueOnce(habit);
+    redis.del = vitest.fn().mockImplementation(() => {});
+
+    const res = await app.inject({
+      method: 'PATCH',
+      url: `/habits/${habit.id}/ACTIVATE`
     });
 
     expect(res.statusCode).toStrictEqual(200);
@@ -156,6 +167,7 @@ describe('habit controller test', () => {
       title: "Any habit",
       created_at: dayjs().subtract(2, 'day').toISOString(),
       user_id,
+      disabled: 'no',
       weekDays: [ 1,2,3 ]
     }
   }

@@ -6,6 +6,7 @@ import 'dayjs/locale/pt-br';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import RedisService from "../lib/cache";
+import { Habit } from "@prisma/client";
 
 dayjs.locale('pt-br');
 dayjs.extend(utc);
@@ -57,7 +58,7 @@ export async function habitController(app: FastifyInstance) {
     const { year, user_id } = toggleParams.parse(request.query);
     const endYear = dayjs().year(year).endOf('year');
 
-    const habits = await prisma.$queryRaw`
+    const habits: Habit[] = await prisma.$queryRaw`
       select 
         habit.id,
         habit.title,
@@ -67,7 +68,12 @@ export async function habitController(app: FastifyInstance) {
             string_agg(W.week_day::text, ',')
           from habit_week_days W
           where habit_id = habit.id
-        ) as weekDays
+        ) as weekDays,
+        (
+          case when deactivation_date is null then 'no'
+          when deactivation_date is not null and (activation_date is not null and date_trunc('day', deactivation_date) >= date_trunc('day', activation_date)) then 'yes'
+          else 'no' end
+        ) as disabled
       from habits habit
       where date_trunc('day', habit.created_at) <= date_trunc('day', ${endYear.toDate()})
       and user_id = ${user_id}
@@ -150,14 +156,15 @@ export async function habitController(app: FastifyInstance) {
     return habit;
   })
 
-  app.delete('/habits/:id', async (request) => {
+  app.patch('/habits/:id/:operation', async (request) => {
     const toggleParams = z.object({
-      id: z.string()
+      id: z.string(),
+      operation: z.string()
     })
 
-    const { id } = toggleParams.parse(request.params);
+    const { id, operation } = toggleParams.parse(request.params);
 
-    await prisma.habitWeekDays.deleteMany({
+    /*await prisma.habitWeekDays.deleteMany({
       where: {
         habit_id: id
       }
@@ -167,7 +174,7 @@ export async function habitController(app: FastifyInstance) {
       where: {
         habit_id: id
       }
-    })
+    })*/
 
     const habit = await prisma.habit.findUnique({
       where: {
@@ -175,13 +182,29 @@ export async function habitController(app: FastifyInstance) {
       }
     })
 
-    redis.del(`stepby::summary::${habit?.user_id}::${dayjs(habit?.created_at).year()}`);
+    if (operation === 'DEACTIVE') {
+      await prisma.habit.update({
+        where: {
+          id
+        },
+        data: {
+          deactivation_date: new Date()
+        }
+      })
 
-    await prisma.habit.delete({
+      return;
+    }
+
+    await prisma.habit.update({
       where: {
         id
+      },
+      data: {
+        activation_date: new Date()
       }
     })
+
+    redis.del(`stepby::summary::${habit?.user_id}::${dayjs(habit?.created_at).year()}`);
   })
 
   app.patch('/habits/:id/toggle', async (request) => {

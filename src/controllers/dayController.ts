@@ -22,19 +22,22 @@ export async function dayController(app: FastifyInstance) {
 
 		const weekDay = dayjs(date).get('day')
 
-		const possibleHabits = await prisma.habit.findMany({
-			where: {
-				created_at: {
-					lte: date,
-				},
-				weekDays: {
-					some: {
-						week_day: weekDay,
-					}
-				},
-				user_id
-			},
-		})
+    const possibleHabits = await prisma.$queryRaw`
+      select * 
+      from habits h
+      join habit_week_days hwd
+        on h.id = hwd.habit_id
+      where date_trunc('day', h.created_at) <= date_trunc('day', ${date})
+      and hwd.week_day in (${weekDay})
+      and (h.deactivation_date is null
+        OR (h.deactivation_date is not null and date_trunc('day', h.deactivation_date) > date_trunc('day', ${date}))
+        OR (h.activation_date is not null and date_trunc('day', h.deactivation_date) <= date_trunc('day', h.activation_date) 
+          and date_trunc('day', h.activation_date) <= date_trunc('day', ${date})
+        )
+      )
+      and h.user_id = ${user_id}
+      order by created_at asc
+    `
 
 		const day = await prisma.day.findFirst({
 			where: {
@@ -46,13 +49,27 @@ export async function dayController(app: FastifyInstance) {
 			}
 		})
 
-		const completedHabits = day?.dayHabits.map(dayHabit => {
-			return dayHabit.habit_id
-		})
+    let completedHabits;
+
+    if (day) {
+      completedHabits = await Promise.all(day.dayHabits.map(async dayHabit => {
+        const habit = await prisma.habit.findUnique({ where: { id: dayHabit.habit_id } });
+  
+        if (!habit?.deactivation_date) {
+          return habit?.id;
+        }
+  
+        if (habit.activation_date 
+          && (dayjs(habit.deactivation_date).isBefore(habit.activation_date) || dayjs(habit.deactivation_date).isSame(habit.activation_date))
+          && (dayjs(habit.activation_date).isBefore(date) || dayjs(habit.activation_date).isSame(date))) {
+          return habit?.id;
+        }
+      }))
+    }
 
 		return {
-			possibleHabits,
-			completedHabits
-		}
+      possibleHabits,
+      completedHabits
+    };
 	})
 }

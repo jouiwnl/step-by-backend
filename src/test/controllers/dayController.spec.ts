@@ -19,8 +19,9 @@ describe('day controller test', () => {
     const day = getValidDay(params.date, params.user_id, possibleHabit.id);
     const validResponse = getValidCompleteDay([possibleHabit], day);
 
-    prisma.habit.findMany = vitest.fn().mockReturnValueOnce([possibleHabit]);
+    prisma.$queryRaw = vitest.fn().mockReturnValueOnce([possibleHabit]);
     prisma.day.findFirst = vitest.fn().mockReturnValueOnce(day);
+    prisma.habit.findUnique = vitest.fn().mockReturnValueOnce(possibleHabit);
 
     const res = await app.inject({
       method: 'GET',
@@ -68,6 +69,8 @@ function getValidHabit(user_id: string) {
   return {
     id: randomUUID(),
     title: "Any habit",
+    activation_date: dayjs("2023-04-07").toISOString(),
+    deactivation_date: dayjs("2023-04-07").toISOString(),
     created_at: dayjs().subtract(2, 'day').toISOString(),
     user_id
   }
