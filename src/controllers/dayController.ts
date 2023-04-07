@@ -37,7 +37,7 @@ export async function dayController(app: FastifyInstance) {
       and hwd.week_day in (${weekDay})
       and (h.deactivation_date is null
         OR (h.deactivation_date is not null and date_trunc('day', h.deactivation_date) > date_trunc('day', ${date}))
-        OR (h.activation_date is not null and date_trunc('day', h.deactivation_date) < date_trunc('day', h.activation_date) 
+        OR (h.activation_date is not null and h.deactivation_date < h.activation_date
           and date_trunc('day', h.activation_date) <= date_trunc('day', ${date})
         )
       )

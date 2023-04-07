@@ -71,7 +71,7 @@ export async function habitController(app: FastifyInstance) {
         ) as weekDays,
         (
           case when deactivation_date is null then 'no'
-          when deactivation_date is not null and (activation_date is not null and date_trunc('day', deactivation_date) > date_trunc('day', activation_date)) then 'yes'
+          when deactivation_date is not null and (activation_date is not null and deactivation_date > activation_date) then 'yes'
           else 'no' end
         ) as disabled
       from habits habit
