@@ -25,7 +25,7 @@ export async function dayController(app: FastifyInstance) {
     const possibleHabits = await prisma.$queryRaw`
       select * 
       from habits h
-      join habit_week_days hwd
+      left join habit_week_days hwd
         on h.id = hwd.habit_id
       where date_trunc('day', h.created_at) <= date_trunc('day', ${date})
       and hwd.week_day in (${weekDay})
