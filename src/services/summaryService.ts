@@ -19,7 +19,7 @@ export default class SummaryService {
       SELECT 
         D.id, 
         D.date,
-        to_char(date, 'YYYYMMDD') as date_parsed,
+        to_char(D.date, 'YYYYMMDD') as date_parsed,
         (
           SELECT 
             cast(count(*) as float)
