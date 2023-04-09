@@ -33,6 +33,8 @@ export async function habitController(app: FastifyInstance) {
 
     redis.del(`stepby::summary::${user_id}::${created_at.getFullYear()}`);
 
+    redis.quit();
+
     await prisma.habit.create({
       data: {
         title,
@@ -154,6 +156,8 @@ export async function habitController(app: FastifyInstance) {
 
     redis.del(`stepby::summary::${habit.user_id}::${dayjs(habit.created_at).year()}`);
 
+    redis.quit();
+
     return habit;
   })
 
@@ -206,6 +210,8 @@ export async function habitController(app: FastifyInstance) {
     })
 
     redis.del(`stepby::summary::${habit?.user_id}::${dayjs(habit?.created_at).year()}`);
+
+    redis.quit();
   })
 
   app.patch('/habits/:id/toggle', async (request) => {
@@ -224,6 +230,8 @@ export async function habitController(app: FastifyInstance) {
     const today = dayjs(date);
 
     redis.del(`stepby::summary::${user_id}::${today.year()}`);
+
+    redis.quit();
 
     let day = await prisma.day.findUnique({
       where: {
