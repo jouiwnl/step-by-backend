@@ -11,6 +11,7 @@ export default class SummaryService {
     let summary = await redis.get(summaryKey);
 
     if (summary) {
+      redis.quit();
       return JSON.parse(summary);
     } 
 
