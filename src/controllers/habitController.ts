@@ -231,8 +231,6 @@ export async function habitController(app: FastifyInstance) {
 
     redis.del(`stepby::summary::${user_id}::${today.year()}`);
 
-    redis.quit();
-
     let day = await prisma.day.findUnique({
       where: {
         date_user_id: {
