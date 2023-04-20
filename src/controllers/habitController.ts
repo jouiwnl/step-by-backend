@@ -1,4 +1,4 @@
-import { Habit } from "@prisma/client";
+import { Habit, HabitType } from "@prisma/client";
 import dayjs from "dayjs";
 import 'dayjs/locale/pt-br';
 import timezone from 'dayjs/plugin/timezone';
@@ -15,6 +15,11 @@ dayjs.tz.setDefault("America/Sao_Paulo");
 
 const weekDaysNumbers = [0, 1, 2, 3, 4, 5, 6] // Sun: 0, Sat: 6
 
+const HABIT_TYPE = {
+  WEEKLY: HabitType.WEEKLY,
+  SPECIFIC_DATE: HabitType.SPECIFIC_DATE
+}
+
 export async function habitController(app: FastifyInstance) {
 
   const redis = RedisService.redis();
@@ -27,7 +32,7 @@ export async function habitController(app: FastifyInstance) {
       ),
       user_id: z.string().uuid(),
       created_at: z.coerce.date(),
-      type: z.string(),
+      type: z.enum(["WEEKLY", "SPECIFIC_DATE"]),
       habit_date: z.coerce.date().optional()
     })
 
@@ -56,7 +61,7 @@ export async function habitController(app: FastifyInstance) {
           }),
         },
         user_id: user_id,
-        type: type,
+        type: HABIT_TYPE[type],
         habit_date: habit_date
       }
     })
@@ -126,7 +131,7 @@ export async function habitController(app: FastifyInstance) {
       weekDays: z.array(
         z.number().min(0).max(6)
       ),
-      type: z.string(),
+      type: z.enum(["WEEKLY", "SPECIFIC_DATE"]),
       habit_date: z.coerce.date().optional()
     })
 
@@ -164,7 +169,7 @@ export async function habitController(app: FastifyInstance) {
             }
           }),
         },
-        type: type,
+        type: HABIT_TYPE[type],
         habit_date: habit_date
       }
     })
