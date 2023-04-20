@@ -7,21 +7,21 @@ export default class SummaryService {
     const redis = RedisService.redis();
 
     const summaryKey = `stepby::summary::${user_id}::${year}`;
-  
+
     let summary = await redis.get(summaryKey);
 
     if (summary) {
       redis.quit();
       return JSON.parse(summary);
-    } 
+    }
 
     summary = await prisma.$queryRaw`
-      SELECT 
-        D.id, 
+      SELECT
+        D.id,
         D.date,
         to_char(D.date, 'YYYYMMDD') as date_parsed,
         (
-          SELECT 
+          SELECT
             cast(count(*) as float)
           FROM day_habits DH
           JOIN habits H
@@ -33,6 +33,7 @@ export default class SummaryService {
             OR (H.activation_date is not null and H.deactivation_date < H.activation_date
                 and date_trunc('day', H.activation_date) <= date_trunc('day', D.date)
               )
+            OR (H.habit_date is not null and date_trunc('day', H.habit_date) = date_trunc('day', D.date))
           )
         ) as completed,
         (
@@ -51,13 +52,14 @@ export default class SummaryService {
               OR (H.activation_date is not null and H.deactivation_date <  H.activation_date
                   and date_trunc('day', H.activation_date) <= date_trunc('day', D.date)
                 )
+              OR (H.habit_date is not null and date_trunc('day', H.habit_date) = date_trunc('day', D.date))
             )
         ) as amount
       FROM days D
       WHERE to_char(D.date, 'YYYY')::int = ${year}
       and user_id = ${user_id}
     `
-  
+
     redis.set(summaryKey, JSON.stringify(summary));
 
     redis.quit();

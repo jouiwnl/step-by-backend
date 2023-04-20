@@ -1,12 +1,12 @@
-import dayjs from "dayjs"
-import { FastifyInstance } from "fastify"
-import { prisma } from "../lib/prisma"
-import { z } from "zod"
-import 'dayjs/locale/pt-br';
-import utc from 'dayjs/plugin/utc'
-import timezone from 'dayjs/plugin/timezone'
-import RedisService from "../lib/cache";
 import { Habit } from "@prisma/client";
+import dayjs from "dayjs";
+import 'dayjs/locale/pt-br';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+import { FastifyInstance } from "fastify";
+import { z } from "zod";
+import RedisService from "../lib/cache";
+import { prisma } from "../lib/prisma";
 
 dayjs.locale('pt-br');
 dayjs.extend(utc);
@@ -26,10 +26,19 @@ export async function habitController(app: FastifyInstance) {
         z.number().min(0).max(6)
       ),
       user_id: z.string().uuid(),
-      created_at: z.coerce.date()
+      created_at: z.coerce.date(),
+      type: z.string(),
+      habit_date: z.coerce.date().optional()
     })
 
-    const { title, weekDays, created_at, user_id } = createHabitBody.parse(request.body)
+    const {
+      title,
+      weekDays,
+      created_at,
+      user_id,
+      type,
+      habit_date
+    } = createHabitBody.parse(request.body)
 
     redis.del(`stepby::summary::${user_id}::${created_at.getFullYear()}`);
 
@@ -46,7 +55,9 @@ export async function habitController(app: FastifyInstance) {
             }
           }),
         },
-        user_id: user_id
+        user_id: user_id,
+        type: type,
+        habit_date: habit_date
       }
     })
   })
@@ -61,12 +72,12 @@ export async function habitController(app: FastifyInstance) {
     const endYear = dayjs().year(year).endOf('year');
 
     const habits: Habit[] = await prisma.$queryRaw`
-      select 
+      select
         habit.id,
         habit.title,
         habit.created_at,
         (
-          select 
+          select
             string_agg(W.week_day::text, ',')
           from habit_week_days W
           where habit_id = habit.id
@@ -115,10 +126,12 @@ export async function habitController(app: FastifyInstance) {
       weekDays: z.array(
         z.number().min(0).max(6)
       ),
+      type: z.string(),
+      habit_date: z.coerce.date().optional()
     })
 
     const { id } = updateParams.parse(request.params);
-    const { title, weekDays } = updateHabitBody.parse(request.body)
+    const { title, weekDays, type, habit_date } = updateHabitBody.parse(request.body)
 
     await prisma.habitWeekDays.deleteMany({
       where: {
@@ -150,7 +163,9 @@ export async function habitController(app: FastifyInstance) {
               week_day: weekDay,
             }
           }),
-        }
+        },
+        type: type,
+        habit_date: habit_date
       }
     })
 
@@ -274,4 +289,3 @@ export async function habitController(app: FastifyInstance) {
     }
   })
 }
-

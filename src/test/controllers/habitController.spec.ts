@@ -71,7 +71,7 @@ describe('habit controller test', () => {
     prisma.habit.update = vitest.fn().mockReturnValueOnce(habit);
     prisma.habitWeekDays.deleteMany = vitest.fn().mockReturnValueOnce(null);
     prisma.dayHabit.deleteMany = vitest.fn().mockReturnValueOnce(null);
-    redis.del = vitest.fn().mockImplementation(() => {});
+    redis.del = vitest.fn().mockImplementation(() => { });
 
     const res = await app.inject({
       method: 'PUT',
@@ -88,7 +88,7 @@ describe('habit controller test', () => {
     const habit = responseHabit();
 
     prisma.habit.findUnique = vitest.fn().mockReturnValueOnce(habit);
-    redis.del = vitest.fn().mockImplementation(() => {});
+    redis.del = vitest.fn().mockImplementation(() => { });
 
     const res = await app.inject({
       method: 'PATCH',
@@ -102,7 +102,7 @@ describe('habit controller test', () => {
     const habit = responseHabit();
 
     prisma.habit.findUnique = vitest.fn().mockReturnValueOnce(habit);
-    redis.del = vitest.fn().mockImplementation(() => {});
+    redis.del = vitest.fn().mockImplementation(() => { });
 
     const res = await app.inject({
       method: 'PATCH',
@@ -123,7 +123,7 @@ describe('habit controller test', () => {
     prisma.dayHabit.findUnique = vitest.fn().mockReturnValueOnce(dayHabit);
     prisma.dayHabit.delete = vitest.fn().mockReturnValueOnce(null);
     prisma.dayHabit.create = vitest.fn().mockReturnValueOnce(null);
-    redis.del = vitest.fn().mockImplementation(() => {});
+    redis.del = vitest.fn().mockImplementation(() => { });
 
     const res = await app.inject({
       method: 'PATCH',
@@ -147,7 +147,7 @@ describe('habit controller test', () => {
     prisma.dayHabit.findUnique = vitest.fn().mockReturnValueOnce(null);
     prisma.dayHabit.delete = vitest.fn().mockReturnValueOnce(null);
     prisma.dayHabit.create = vitest.fn().mockReturnValueOnce(getValidDayHabit(habit.id, day.id));
-    redis.del = vitest.fn().mockImplementation(() => {});
+    redis.del = vitest.fn().mockImplementation(() => { });
 
     const res = await app.inject({
       method: 'PATCH',
@@ -168,7 +168,8 @@ describe('habit controller test', () => {
       created_at: dayjs().subtract(2, 'day').toISOString(),
       user_id,
       disabled: 'no',
-      weekDays: [ 1,2,3 ]
+      weekDays: [1, 2, 3],
+      type: "WEEKLY"
     }
   }
 
@@ -178,7 +179,8 @@ describe('habit controller test', () => {
       title: "Any habit",
       created_at: dayjs().subtract(2, 'day').toISOString(),
       user_id: randomUUID(),
-      weekDays: [ 1,2,3 ]
+      weekDays: [1, 2, 3],
+      type: "WEEKLY"
     }
   }
 

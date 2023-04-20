@@ -18,6 +18,8 @@ model Habit {
   user_id String
   deactivation_date DateTime?
   activation_date DateTime?
+  type HabitType @default(WEEKLY)
+  habit_date DateTime?
 
   user User @relation(fields: [user_id], references: [id])
 
@@ -82,7 +84,7 @@ model User {
   habits Habit[]
   days Day[]
   color Color?
-  
+
   @@map("users")
 }
 
@@ -98,11 +100,16 @@ model Color {
   color_2 String
   color_3 String
   color_4 String
-  color_5 String 
+  color_5 String
 
   user_id String @unique
 
   user User @relation(fields: [user_id], references: [id])
 
   @@map("colors")
+}
+
+enum HabitType {
+  SPECIFIC_DATE
+  WEEKLY
 }
