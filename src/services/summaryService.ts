@@ -39,11 +39,12 @@ export default class SummaryService {
         (
           SELECT
             cast(count(*) as float)
-          FROM habit_week_days HDW
-          JOIN habits H
-            ON H.id = HDW.habit_id
+          FROM habits H
           WHERE
-            (HDW.week_day = (to_char(D.date, 'D')::int) - 1 OR (H.habit_date is not null and date_trunc('day', H.habit_date) = date_trunc('day', D.date)))
+            (
+              exists(select 1 from habit_week_days hwd where hwd.habit_id = H.id and hwd.week_day = (to_char(D.date, 'D')::int) - 1) 
+              or (h.habit_date is not null and date_trunc('day', h.habit_date) = date_trunc('day', D.date))
+            )
             AND date_trunc('day', H.created_at) <= date_trunc('day', D.date)
             AND H.user_id = ${user_id}
             AND (
