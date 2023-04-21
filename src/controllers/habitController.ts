@@ -81,6 +81,8 @@ export async function habitController(app: FastifyInstance) {
         habit.id,
         habit.title,
         habit.created_at,
+        habit.type,
+        habit.habit_date,
         (
           select
             string_agg(W.week_day::text, ',')
