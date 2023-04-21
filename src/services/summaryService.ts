@@ -43,7 +43,7 @@ export default class SummaryService {
           JOIN habits H
             ON H.id = HDW.habit_id
           WHERE
-            HDW.week_day = (to_char(D.date, 'D')::int) - 1
+            (HDW.week_day = (to_char(D.date, 'D')::int) - 1 OR (H.habit_date is not null and date_trunc('day', H.habit_date) = date_trunc('day', D.date))
             AND date_trunc('day', H.created_at) <= date_trunc('day', D.date)
             AND H.user_id = ${user_id}
             AND (

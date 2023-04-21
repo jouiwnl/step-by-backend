@@ -34,7 +34,7 @@ export async function dayController(app: FastifyInstance) {
       join habit_week_days hwd
         on h.id = hwd.habit_id
       where date_trunc('day', h.created_at) <= date_trunc('day', ${date})
-      and hwd.week_day in (${weekDay})
+      and (hwd.week_day in (${weekDay}) OR (h.habit_date is not null and date_trunc('day', h.habit_date) = date_trunc('day', ${date})))
       and (h.deactivation_date is null
         OR (h.deactivation_date is not null and date_trunc('day', h.deactivation_date) > date_trunc('day', ${date}))
         OR (h.activation_date is not null and h.deactivation_date < h.activation_date
